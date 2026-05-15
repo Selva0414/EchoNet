@@ -5,25 +5,35 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const tintColorLight = '#25D366'; // WhatsApp Green
+const tintColorDark = '#25D366';
 
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
+    background: '#FFFFFF',
     tint: tintColorLight,
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    headerBackground: '#075E54', // WhatsApp Header
+    headerText: '#FFFFFF',
+    chatBackground: '#E5DDD5',
+    myBubble: '#DCF8C6',
+    theirBubble: '#FFFFFF',
   },
   dark: {
     text: '#ECEDEE',
-    background: '#151718',
+    background: '#111B21', // WhatsApp Dark Background
     tint: tintColorDark,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    headerBackground: '#202C33',
+    headerText: '#ECEDEE',
+    chatBackground: '#0B141A',
+    myBubble: '#005C4B',
+    theirBubble: '#202C33',
   },
 };
 
