@@ -9,6 +9,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Auth Routes for Global Access
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    res.json({ 
+      user: { id: user._id, email: user.email, name: user.name, profileImage: user.profileImage } 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/signup', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+    const newUser = await User.create({ email, password });
+    res.json({ 
+      user: { id: newUser._id, email: newUser.email, name: newUser.name, profileImage: newUser.profileImage } 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Health check route
 app.get('/', (req, res) => {
   res.send('EchoNet Server is Running Successfully! 🚀');

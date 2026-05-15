@@ -51,14 +51,16 @@ function AuthScreen({ login }: { login: Function }) {
       const apiUrl = Platform.OS === 'web'
         ? window.location.origin
         : process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
-      const action = isLogin ? 'login' : 'signup';
       
-      const response = await fetch(`${apiUrl}/api/login`, {
+      const endpoint = isLogin ? '/api/login' : '/api/signup';
+      console.log(`Authenticating with ${apiUrl}${endpoint}`);
+      
+      const response = await fetch(`${apiUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, action }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
