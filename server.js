@@ -9,26 +9,56 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Auth Routes for Global Access
+// --- Unified Schemas & Models ---
+const UserSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  name: { type: String },
+  profileImage: { type: String },
+}, { timestamps: true });
+
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
+
+const MessageSchema = new mongoose.Schema({
+  senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  content: { type: String },
+  type: { type: String, enum: ['text', 'image', 'audio'], default: 'text' },
+  mediaUrl: { type: String },
+  timestamp: { type: Date, default: Date.now },
+  read: { type: Boolean, default: false },
+});
+
+const Message = mongoose.models.Message || mongoose.model('Message', MessageSchema);
+
+// --- Auth Routes ---
 app.post('/api/login', async (req, res) => {
   try {
-    const email = req.body.email?.toLowerCase().trim();
-    const password = req.body.password?.trim();
+    const rawEmail = req.body.email;
+    const rawPassword = req.body.password;
+    
+    const email = rawEmail?.toLowerCase().trim();
+    const password = rawPassword?.trim();
 
-    console.log(`Login attempt for: ${email}`);
-
+    console.log(`--- Login Attempt ---`);
+    console.log(`Email: [${email}]`);
+    
     const user = await User.findOne({ email });
     if (!user) {
-      console.log(`User not found: ${email}`);
+      console.log(`Result: User not found`);
       return res.status(401).json({ error: 'User not found' });
     }
 
+    console.log(`Found User: ${user.email}`);
+    
     if (user.password !== password) {
-      console.log(`Invalid password for: ${email}`);
+      console.log(`Result: Password mismatch`);
+      console.log(`Provided: [${password}]`);
+      // For security we don't log the stored password, but we verify the comparison
       return res.status(401).json({ error: 'Invalid password' });
     }
 
-    console.log(`Login successful for: ${email}`);
+    console.log(`Result: SUCCESS`);
     res.json({ 
       user: { id: user._id, email: user.email, name: user.name, profileImage: user.profileImage } 
     });
@@ -104,6 +134,29 @@ app.get('/api/chats', async (req, res) => {
   }
 });
 
+// Profile Update Route
+app.post('/api/profile', async (req, res) => {
+  try {
+    const { userId, name, profileImage } = req.body;
+    if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name, profileImage },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ error: 'User not found' });
+
+    res.json({ 
+      message: 'Profile updated successfully',
+      user: { id: updatedUser._id, email: updatedUser.email, name: updatedUser.name, profileImage: updatedUser.profileImage }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Messages History Route
 app.get('/api/messages', async (req, res) => {
   try {
@@ -142,27 +195,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected for Socket Server'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Message Schema
-const MessageSchema = new mongoose.Schema({
-  senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  content: { type: String },
-  type: { type: String, enum: ['text', 'image', 'audio'], default: 'text' },
-  mediaUrl: { type: String },
-  timestamp: { type: Date, default: Date.now },
-  read: { type: Boolean, default: false },
-});
-
-const Message = mongoose.models.Message || mongoose.model('Message', MessageSchema);
-
-// User Schema (simplified for socket server)
-const UserSchema = new mongoose.Schema({
-  email: { type: String, required: true },
-  name: { type: String },
-  profileImage: { type: String },
-});
-
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
+// --- Socket.io Logic ---
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -185,7 +218,6 @@ io.on('connection', (socket) => {
       });
       
       // Fetch sender name for notification
-      const User = mongoose.model('User');
       const sender = await User.findById(senderId).select('name email');
       const senderName = sender?.name || sender?.email?.split('@')[0] || 'Someone';
 

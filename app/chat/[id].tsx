@@ -77,11 +77,7 @@ export default function ChatRoom() {
     if (!currentUser?.id || !receiverId) return;
     
     try {
-      const apiUrl = Platform.OS === 'web'
-        ? window.location.origin
-        : process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
-      
-      console.log(`Fetching messages for ${currentUser.id} and ${receiverId} from ${apiUrl}`);
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
       const response = await fetch(`${apiUrl}/api/messages?user1=${currentUser.id}&user2=${receiverId}`);
       const data = await response.json();
       
@@ -97,14 +93,13 @@ export default function ChatRoom() {
 
   const fetchReceiverInfo = async () => {
     try {
-      const apiUrl = Platform.OS === 'web'
-        ? window.location.origin
-        : process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
-      
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
       const response = await fetch(`${apiUrl}/api/users`);
       const data = await response.json();
-      const rec = data.find((u: any) => u._id === receiverId);
-      if (rec) setReceiver(rec);
+      if (Array.isArray(data)) {
+        const rec = data.find((u: any) => (u.id || u._id) === receiverId);
+        if (rec) setReceiver(rec);
+      }
     } catch (error) {
       console.error('Failed to fetch receiver info', error);
     }
