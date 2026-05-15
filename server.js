@@ -12,22 +12,37 @@ app.use(express.json());
 // Auth Routes for Global Access
 app.post('/api/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password?.trim();
+
+    console.log(`Login attempt for: ${email}`);
+
     const user = await User.findOne({ email });
-    if (!user || user.password !== password) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+    if (!user) {
+      console.log(`User not found: ${email}`);
+      return res.status(401).json({ error: 'User not found' });
     }
+
+    if (user.password !== password) {
+      console.log(`Invalid password for: ${email}`);
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+
+    console.log(`Login successful for: ${email}`);
     res.json({ 
       user: { id: user._id, email: user.email, name: user.name, profileImage: user.profileImage } 
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
 app.post('/api/signup', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password?.trim();
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
@@ -36,6 +51,73 @@ app.post('/api/signup', async (req, res) => {
     res.json({ 
       user: { id: newUser._id, email: newUser.email, name: newUser.name, profileImage: newUser.profileImage } 
     });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// User List Route
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find({}, 'email name profileImage');
+    const formattedUsers = users.map(u => ({
+      id: u._id,
+      email: u.email,
+      name: u.name,
+      profileImage: u.profileImage
+    }));
+    res.json(formattedUsers);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Active Chats Route
+app.get('/api/chats', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+    const messages = await Message.find({
+      $or: [{ senderId: userId }, { receiverId: userId }]
+    }).select('senderId receiverId');
+
+    const partnerIds = new Set();
+    messages.forEach(msg => {
+      const sId = msg.senderId.toString();
+      const rId = msg.receiverId.toString();
+      if (sId !== userId) partnerIds.add(sId);
+      if (rId !== userId) partnerIds.add(rId);
+    });
+
+    const chats = await User.find({ _id: { $in: Array.from(partnerIds) } }).select('name email profileImage');
+    const formattedChats = chats.map(u => ({
+      id: u._id,
+      email: u.email,
+      name: u.name,
+      profileImage: u.profileImage
+    }));
+    res.json(formattedChats);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Messages History Route
+app.get('/api/messages', async (req, res) => {
+  try {
+    const { user1, user2 } = req.query;
+    if (!user1 || !user2) return res.status(400).json({ error: 'Missing users' });
+
+    const messages = await Message.find({
+      $or: [
+        { senderId: user1, receiverId: user2 },
+        { senderId: user2, receiverId: user1 },
+      ],
+    }).sort({ timestamp: 1 });
+    
+    res.json(messages);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
