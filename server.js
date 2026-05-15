@@ -9,6 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check route
+app.get('/', (req, res) => {
+  res.send('EchoNet Server is Running Successfully! 🚀');
+});
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
