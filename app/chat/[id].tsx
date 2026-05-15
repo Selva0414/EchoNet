@@ -18,7 +18,8 @@ import { useSocket } from '@/context/SocketContext';
 import { useTheme } from '@/context/ThemeContext';
 
 export default function ChatRoom() {
-  const { id: receiverId } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const receiverId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
   const { user: currentUser } = useAuth();
   const { toggleTheme } = useTheme();
   const { socket: globalSocket } = useSocket() || { socket: null };

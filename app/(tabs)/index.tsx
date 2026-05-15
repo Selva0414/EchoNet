@@ -162,8 +162,18 @@ function ChatList() {
   const router = useRouter();
   const { user: currentUser, logout } = useAuth();
   const { toggleTheme } = useTheme();
+  const { socket } = useSocket() || { socket: null };
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'light'];
+ 
+  useEffect(() => {
+    if (socket) {
+      socket.on('receive_message', fetchUsers);
+      return () => {
+        socket.off('receive_message', fetchUsers);
+      };
+    }
+  }, [socket]);
 
   useFocusEffect(
     useCallback(() => {
