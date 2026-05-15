@@ -92,13 +92,13 @@ export default function ChatRoom() {
   };
 
   const fetchReceiverInfo = async () => {
+    if (!receiverId) return;
     try {
       const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
-      const response = await fetch(`${apiUrl}/api/users`);
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        const rec = data.find((u: any) => (u.id || u._id) === receiverId);
-        if (rec) setReceiver(rec);
+      const response = await fetch(`${apiUrl}/api/users/${receiverId}`);
+      const info = await response.json();
+      if (info && !info.error) {
+        setReceiver(info);
       }
     } catch (error) {
       console.error('Failed to fetch receiver info', error);
@@ -106,21 +106,32 @@ export default function ChatRoom() {
   };
 
   const sendMessage = (type = 'text', mediaUrl = '') => {
-    if (!globalSocket) return;
+    if (!globalSocket) {
+      alert('Connecting to server... Please wait.');
+      return;
+    }
     if (type === 'text' && !input.trim()) return;
 
     const messageData = {
+      _id: Date.now().toString(), // Temporary ID for optimistic UI
       senderId: currentUser.id,
       receiverId: receiverId,
       content: type === 'text' ? input.trim() : '',
       type,
       mediaUrl,
+      timestamp: new Date().toISOString(),
+      senderName: currentUser.name || currentUser.email.split('@')[0],
+      isOptimistic: true,
     };
 
+    // Optimistically add to list
+    setMessages(prev => [...prev, messageData]);
+    
+    // Send to server
     globalSocket.emit('send_message', messageData);
+
     if (type === 'text') {
       setInput('');
-      setShowEmojiPicker(false);
     }
   };
 

@@ -103,6 +103,22 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// Single User Lookup Route
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id, 'email name profileImage');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      profileImage: user.profileImage
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Active Chats Route
 app.get('/api/chats', async (req, res) => {
   try {
