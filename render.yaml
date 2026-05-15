@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: echonet-server
+    env: node
+    buildCommand: npm install
+    startCommand: npm run start:server
+    envVars:
+      - key: MONGODB_URI
+        sync: false # You will set this in the Render dashboard
+      - key: NODE_ENV
+        value: production
