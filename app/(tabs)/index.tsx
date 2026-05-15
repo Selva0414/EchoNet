@@ -199,8 +199,10 @@ function ChatList() {
       const response = await fetch(`${apiUrl}${endpoint}`);
       const data = await response.json();
       
-      const otherUsers = data.filter((u: any) => (u.id || u._id) !== currentUser?.id);
-      setUsers(otherUsers);
+      if (Array.isArray(data)) {
+        const otherUsers = data.filter((u: any) => (u.id || u._id) !== (currentUser?.id || ''));
+        setUsers(otherUsers);
+      }
     } catch (error) {
       console.error('Failed to fetch users', error);
     } finally {
