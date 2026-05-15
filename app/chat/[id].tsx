@@ -19,7 +19,9 @@ import { useTheme } from '@/context/ThemeContext';
 
 export default function ChatRoom() {
   const params = useLocalSearchParams();
-  const receiverId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
+  const rawId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : '';
+  // Clean the ID (remove quotes and whitespace)
+  const receiverId = rawId.replace(/['"]+/g, '').trim();
   const { user: currentUser } = useAuth();
   const { toggleTheme } = useTheme();
   const { socket: globalSocket } = useSocket() || { socket: null };
@@ -96,10 +98,21 @@ export default function ChatRoom() {
     if (!receiverId) return;
     try {
       const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
+      
+      // Try Direct Lookup first
       const response = await fetch(`${apiUrl}/api/users/${receiverId}`);
       const info = await response.json();
-      if (info && !info.error) {
+      
+      if (info && info.name) {
         setReceiver(info);
+      } else {
+        // Fallback: Search in full list
+        const listResponse = await fetch(`${apiUrl}/api/users`);
+        const listData = await listResponse.json();
+        if (Array.isArray(listData)) {
+          const fallback = listData.find(u => (u.id || u._id) === receiverId);
+          if (fallback) setReceiver(fallback);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch receiver info', error);
@@ -115,8 +128,8 @@ export default function ChatRoom() {
 
     const messageData = {
       _id: Date.now().toString(), // Temporary ID for optimistic UI
-      senderId: currentUser.id,
-      receiverId: receiverId,
+      senderId: String(currentUser.id).replace(/['"]+/g, '').trim(),
+      receiverId: String(receiverId).replace(/['"]+/g, '').trim(),
       content: type === 'text' ? input.trim() : '',
       type,
       mediaUrl,

@@ -29,9 +29,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (storedUser) {
           const parsed = JSON.parse(storedUser);
           if (parsed && (parsed.id || parsed._id)) {
+            const rawId = parsed.id || parsed._id;
             setUser({
               ...parsed,
-              id: parsed.id || parsed._id // Handle both naming conventions
+              id: String(rawId).replace(/['"]+/g, '').trim()
             });
           }
         }
@@ -45,10 +46,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadUser();
   }, []);
 
-  const login = async (userData: User) => {
+  const login = async (userData: any) => {
     try {
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      const cleanData = {
+        ...userData,
+        id: String(userData.id || userData._id).replace(/['"]+/g, '').trim()
+      };
+      await AsyncStorage.setItem('user', JSON.stringify(cleanData));
+      setUser(cleanData);
     } catch (error) {
       console.error('Failed to save user', error);
     }

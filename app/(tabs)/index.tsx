@@ -194,8 +194,8 @@ function ChatList() {
         ? window.location.origin
         : process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
       
-      // Use /api/chats for Inbox, /api/users for full contact list
-      const endpoint = isSelectingContact ? '/api/users' : `/api/chats?userId=${currentUser?.id}`;
+      const cleanId = String(currentUser?.id).replace(/['"]+/g, '').trim();
+      const endpoint = isSelectingContact ? '/api/users' : `/api/chats?userId=${cleanId}`;
       const response = await fetch(`${apiUrl}${endpoint}`);
       const data = await response.json();
       

@@ -34,8 +34,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       const newSocket = io(socketUrl);
 
       newSocket.on('connect', () => {
-        console.log('Socket connected:', newSocket.id);
-        newSocket.emit('join', user.id);
+        const cleanId = String(user.id).replace(/['"]+/g, '').trim();
+        console.log('Socket connected:', newSocket.id, 'Joining room:', cleanId);
+        newSocket.emit('join', cleanId);
       });
 
       newSocket.on('receive_message', async (message) => {

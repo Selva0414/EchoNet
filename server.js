@@ -217,12 +217,17 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   socket.on('join', (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their room`);
+    const cleanId = String(userId).replace(/['"]+/g, '').trim();
+    socket.join(cleanId);
+    console.log(`User ${cleanId} joined their room`);
   });
 
   socket.on('send_message', async (data) => {
-    const { senderId, receiverId, content, type, mediaUrl } = data;
+    let { senderId, receiverId, content, type, mediaUrl } = data;
+    
+    // Sanitize IDs
+    senderId = String(senderId).replace(/['"]+/g, '').trim();
+    receiverId = String(receiverId).replace(/['"]+/g, '').trim();
     
     try {
       const newMessage = await Message.create({ 
