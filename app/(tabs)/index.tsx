@@ -229,30 +229,43 @@ function ChatList() {
     router.push(`/chat/${userId}`);
   };
 
-  const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity 
-      style={styles.chatItem}
-      onPress={() => onSelectContact(item.id || item._id)}
-    >
-      <View style={styles.avatar}>
-        {item.profileImage ? (
-          <Image source={{ uri: item.profileImage }} style={styles.avatarImage} />
-        ) : (
-          <ThemedText style={styles.avatarText}>
-            {(item.name || item.email)[0].toUpperCase()}
-          </ThemedText>
-        )}
-      </View>
-      <View style={styles.chatInfo}>
-        <View style={styles.chatHeader}>
-          <ThemedText style={styles.chatName}>{item.name || item.email.split('@')[0]}</ThemedText>
+  const renderItem = ({ item }: { item: any }) => {
+    const displayName = item.name || item.email.split('@')[0];
+    return (
+      <TouchableOpacity 
+        style={[styles.chatItem, { borderBottomColor: theme.border }]}
+        onPress={() => onSelectContact(item.id || item._id)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.avatarContainer}>
+          <View style={[styles.avatar, { borderColor: theme.border }]}>
+            {item.profileImage ? (
+              <Image source={{ uri: item.profileImage }} style={styles.avatarImage} />
+            ) : (
+              <ThemedText style={styles.avatarText}>
+                {displayName[0].toUpperCase()}
+              </ThemedText>
+            )}
+          </View>
+          <View style={styles.onlineStatusIndicator} />
         </View>
-        <ThemedText style={styles.lastMessage} numberOfLines={1}>
-          {isSelectingContact ? (item.email) : 'Tap to start chatting...'}
-        </ThemedText>
-      </View>
-    </TouchableOpacity>
-  );
+
+        <View style={styles.chatInfo}>
+          <View style={styles.chatHeader}>
+            <ThemedText style={styles.chatName} numberOfLines={1}>{displayName}</ThemedText>
+            <ThemedText style={styles.chatTime}>
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </ThemedText>
+          </View>
+          <View style={styles.chatFooter}>
+            <ThemedText style={[styles.lastMessage, { color: theme.secondaryText }]} numberOfLines={1}>
+              {isSelectingContact ? item.email : 'Tap to start chatting...'}
+            </ThemedText>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -472,18 +485,36 @@ const styles = StyleSheet.create({
   chatItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginHorizontal: 8,
+    borderRadius: 12,
+    marginVertical: 2,
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginRight: 16,
   },
   avatar: {
-    width: 55,
-    height: 55,
-    borderRadius: 27.5,
-    backgroundColor: '#85959f',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#384147',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    borderWidth: 1,
     overflow: 'hidden',
+  },
+  onlineStatusIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#00E676',
+    borderWidth: 2,
+    borderColor: '#0B141A',
   },
   avatarImage: {
     width: '100%',
@@ -491,36 +522,56 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   chatInfo: {
     flex: 1,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(150, 150, 150, 0.2)',
-    paddingBottom: 12,
+    justifyContent: 'center',
   },
   chatHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'center',
+    marginBottom: 6,
   },
   chatName: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
+    maxWidth: '70%',
   },
   chatTime: {
     fontSize: 12,
-    color: '#888',
+    color: '#8696A0',
+  },
+  chatFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   lastMessage: {
     fontSize: 14,
-    color: '#888',
+    maxWidth: '85%',
+  },
+  unreadBadge: {
+    backgroundColor: '#00E676',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  unreadCount: {
+    color: '#000',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   emptyText: {
     textAlign: 'center',
-    marginTop: 40,
-    color: '#888',
+    marginTop: 60,
+    fontSize: 16,
+    opacity: 0.6,
   },
   fab: {
     position: 'absolute',

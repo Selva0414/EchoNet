@@ -239,32 +239,37 @@ export default function ChatRoom() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const isMine = item.senderId === currentUser?.id;
+    const isMine = String(item.senderId).replace(/['"]+/g, '').trim() === String(currentUser?.id).replace(/['"]+/g, '').trim();
     return (
       <View style={[styles.messageWrapper, isMine ? styles.myMessageWrapper : styles.theirMessageWrapper]}>
-        <View style={[styles.messageBubble, isMine ? { backgroundColor: theme.myBubble } : { backgroundColor: theme.theirBubble }]}>
+        <View style={[
+          styles.messageBubble, 
+          isMine ? { backgroundColor: theme.myBubble, borderBottomRightRadius: 2 } : { backgroundColor: theme.theirBubble, borderBottomLeftRadius: 2 }
+        ]}>
           {item.type === 'image' && (
             <Image source={{ uri: item.mediaUrl }} style={styles.messageImage} />
           )}
           
           {item.type === 'audio' && (
             <TouchableOpacity onPress={() => playAudio(item.mediaUrl)} style={styles.audioPlayer}>
-              <IconSymbol name="mic.fill" size={20} color={isMine ? '#fff' : '#00A884'} />
-              <ThemedText style={[styles.audioText, { color: isMine ? '#fff' : '#000' }]}>Voice Message</ThemedText>
+              <View style={[styles.audioIconContainer, { backgroundColor: isMine ? 'rgba(255,255,255,0.2)' : 'rgba(0,230,118,0.1)' }]}>
+                <IconSymbol name="mic.fill" size={18} color={isMine ? '#fff' : '#00E676'} />
+              </View>
+              <ThemedText style={[styles.audioText, { color: isMine ? '#fff' : theme.text }]}>Voice Message</ThemedText>
             </TouchableOpacity>
           )}
 
           {item.content ? (
-            <ThemedText style={[styles.messageText, { color: colorScheme === 'dark' ? '#E9EDEF' : '#111B21' }]}>
+            <ThemedText style={[styles.messageText, { color: isMine ? '#fff' : theme.text }]}>
               {item.content}
             </ThemedText>
           ) : null}
           
           <View style={styles.messageFooter}>
-            <ThemedText style={styles.timestamp}>
+            <ThemedText style={[styles.timestamp, { color: isMine ? 'rgba(255,255,255,0.6)' : theme.secondaryText }]}>
               {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </ThemedText>
-            {isMine && <IconSymbol name="checkmark" size={14} color="#53BDEB" style={{ marginLeft: 4 }} />}
+            {isMine && <IconSymbol name="checkmark" size={12} color="#53BDEB" style={{ marginLeft: 4 }} />}
           </View>
         </View>
       </View>
@@ -297,28 +302,29 @@ export default function ChatRoom() {
         </View>
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#25D366" style={{ flex: 1 }} />
-      ) : (
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item: any, index) => item._id || index.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        />
-      )}
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 25}
         style={{ flex: 1 }}
       >
+        {loading ? (
+          <ActivityIndicator size="large" color="#00E676" style={{ flex: 1 }} />
+        ) : (
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item: any, index) => item._id || index.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContent}
+            style={{ flex: 1 }}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          />
+        )}
+
         <View style={styles.inputArea}>
           <View style={[styles.inputContainer, { backgroundColor: colorScheme === 'dark' ? '#202C33' : '#FFF' }]}>
             <TouchableOpacity onPress={() => setShowEmojiPicker(!showEmojiPicker)}>
-              <IconSymbol name="face.smiling" size={24} color={showEmojiPicker ? "#00A884" : "#8696A0"} style={{ marginRight: 10 }} />
+              <IconSymbol name="face.smiling" size={24} color={showEmojiPicker ? "#00E676" : "#8696A0"} style={{ marginRight: 10 }} />
             </TouchableOpacity>
             <TextInput
               style={[styles.input, { color: colorScheme === 'dark' ? '#FFF' : '#000' }]}
@@ -445,7 +451,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   messageWrapper: {
-    marginBottom: 4,
+    marginBottom: 8,
     maxWidth: '85%',
   },
   myMessageWrapper: {
@@ -455,9 +461,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   messageBubble: {
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -465,69 +471,83 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
   },
   messageImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 5,
+    width: 240,
+    height: 240,
+    borderRadius: 12,
+    marginBottom: 6,
   },
   audioPlayer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    gap: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    gap: 12,
+  },
+  audioIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   audioText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '500',
   },
   messageText: {
     fontSize: 16,
+    lineHeight: 22,
   },
   messageFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    marginTop: 2,
-    marginLeft: 10,
+    marginTop: 4,
   },
   timestamp: {
-    fontSize: 11,
-    color: '#8696A0',
+    fontSize: 10,
   },
   inputArea: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 8,
+    alignItems: 'flex-end',
+    paddingHorizontal: 8,
+    paddingBottom: Platform.OS === 'ios' ? 35 : 12,
+    paddingTop: 8,
   },
   inputContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 25,
+    borderRadius: 28,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginRight: 5,
-    elevation: 2,
+    paddingVertical: 4,
+    marginRight: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    minHeight: 50,
   },
   input: {
     flex: 1,
     fontSize: 17,
     maxHeight: 120,
-    paddingVertical: 0,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   sendButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#00A884',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#00E676',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 1,
+    shadowRadius: 3,
   },
   emojiPickerContainer: {
     height: 250,

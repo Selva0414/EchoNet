@@ -5,35 +5,39 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#25D366'; // WhatsApp Green
-const tintColorDark = '#25D366';
+const tintColorLight = '#00A884'; 
+const tintColorDark = '#00E676';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#FFFFFF',
+    text: '#111B21',
+    secondaryText: '#667781',
+    background: '#F0F2F5',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: '#54656F',
+    tabIconDefault: '#54656F',
     tabIconSelected: tintColorLight,
-    headerBackground: '#075E54', // WhatsApp Header
-    headerText: '#FFFFFF',
-    chatBackground: '#E5DDD5',
-    myBubble: '#DCF8C6',
+    headerBackground: '#FFFFFF',
+    headerText: '#111B21',
+    chatBackground: '#EFEAE2',
+    myBubble: '#D9FDD3',
     theirBubble: '#FFFFFF',
+    border: '#E9EDEF',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#111B21', // WhatsApp Dark Background
+    text: '#E9EDEF',
+    secondaryText: '#8696A0',
+    background: '#0B141A',
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: '#AEBAC1',
+    tabIconDefault: '#AEBAC1',
     tabIconSelected: tintColorDark,
-    headerBackground: '#202C33',
-    headerText: '#ECEDEE',
-    chatBackground: '#0B141A',
+    headerBackground: '#111B21',
+    headerText: '#E9EDEF',
+    chatBackground: '#060C10',
     myBubble: '#005C4B',
     theirBubble: '#202C33',
+    border: '#222D34',
   },
 };
 

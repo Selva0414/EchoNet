@@ -85,15 +85,19 @@ export default function ProfileScreen() {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={isEditing ? pickImage : undefined} style={styles.avatarContainer}>
+        <TouchableOpacity onPress={isEditing ? pickImage : undefined} style={[styles.avatarContainer, { borderColor: theme.tint }]}>
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.avatar} />
           ) : (
-            <IconSymbol size={100} name="person.circle.fill" color="#888" />
+            <View style={styles.avatarPlaceholder}>
+              <ThemedText style={styles.avatarPlaceholderText}>
+                {(user.name || user.email)[0].toUpperCase()}
+              </ThemedText>
+            </View>
           )}
           {isEditing && (
             <View style={styles.editOverlay}>
-              <IconSymbol size={24} name="camera.fill" color="#fff" />
+              <IconSymbol size={20} name="camera.fill" color="#fff" />
             </View>
           )}
         </TouchableOpacity>
@@ -101,49 +105,60 @@ export default function ProfileScreen() {
         {isEditing ? (
           <View style={styles.editForm}>
             <TextInput
-              style={[styles.nameInput, { color: theme.text, borderBottomColor: '#25D366' }]}
+              style={[styles.nameInput, { color: theme.text, borderBottomColor: theme.tint }]}
               value={name}
               onChangeText={setName}
               placeholder="Your Name"
-              placeholderTextColor="#888"
+              placeholderTextColor={theme.secondaryText}
               autoFocus
             />
-            <ThemedText style={styles.email}>{user.email}</ThemedText>
+            <ThemedText style={[styles.email, { color: theme.secondaryText }]}>{user.email}</ThemedText>
           </View>
         ) : (
           <View style={styles.infoContainer}>
             <ThemedText type="title" style={styles.name}>{user.name || 'Set Name'}</ThemedText>
-            <ThemedText style={styles.email}>{user.email}</ThemedText>
+            <ThemedText style={[styles.email, { color: theme.secondaryText }]}>{user.email}</ThemedText>
           </View>
         )}
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: theme.headerBackground }]}>
         {isEditing ? (
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <ThemedText style={styles.saveText}>Save Profile</ThemedText>}
+          <TouchableOpacity style={[styles.menuItem, { borderTopWidth: 0 }]} onPress={handleSave} disabled={loading}>
+            <IconSymbol size={22} name="checkmark.circle.fill" color={theme.tint} />
+            <ThemedText style={[styles.menuText, { color: theme.tint, fontWeight: 'bold' }]}>
+              {loading ? 'Saving...' : 'Save Profile Changes'}
+            </ThemedText>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
-            <IconSymbol size={20} name="paintbrush.fill" color="#fff" />
-            <ThemedText style={styles.editButtonText}>Edit Profile</ThemedText>
+          <TouchableOpacity style={[styles.menuItem, { borderTopWidth: 0 }]} onPress={() => setIsEditing(true)}>
+            <IconSymbol size={22} name="paintbrush.fill" color={theme.tint} />
+            <ThemedText style={styles.menuText}>Edit Profile</ThemedText>
+            <IconSymbol size={18} name="chevron.right" color={theme.secondaryText} />
           </TouchableOpacity>
         )}
         
         <TouchableOpacity style={styles.menuItem}>
-          <IconSymbol size={24} name="bell.fill" color="#25D366" />
+          <IconSymbol size={22} name="bell.fill" color="#53BDEB" />
           <ThemedText style={styles.menuText}>Notifications</ThemedText>
+          <IconSymbol size={18} name="chevron.right" color={theme.secondaryText} />
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.menuItem}>
-          <IconSymbol size={24} name="lock.fill" color="#25D366" />
+          <IconSymbol size={22} name="lock.fill" color="#FFD700" />
           <ThemedText style={styles.menuText}>Privacy & Security</ThemedText>
+          <IconSymbol size={18} name="chevron.right" color={theme.secondaryText} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={logout}>
+          <IconSymbol size={22} name="rectangle.portrait.and.arrow.right" color="#FF4B4B" />
+          <ThemedText style={[styles.menuText, { color: '#FF4B4B' }]}>Log Out</ThemedText>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-        <ThemedText style={styles.logoutText}>Log Out</ThemedText>
-      </TouchableOpacity>
+      <ThemedText style={[styles.footerText, { color: theme.secondaryText }]}>
+        EchoNet v1.0.0
+      </ThemedText>
     </ThemedView>
   );
 }
@@ -156,15 +171,15 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: 60,
-    marginBottom: 30,
+    marginTop: 40,
+    marginBottom: 40,
   },
   avatarContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(150, 150, 150, 0.1)',
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 3,
+    padding: 4,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -173,15 +188,33 @@ const styles = StyleSheet.create({
   avatar: {
     width: '100%',
     height: '100%',
+    borderRadius: 60,
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 60,
+    backgroundColor: '#1C252E',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarPlaceholderText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   editOverlay: {
     position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: '35%',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    bottom: 4,
+    right: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#00E676',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#0B141A',
   },
   infoContainer: {
     alignItems: 'center',
@@ -191,12 +224,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    fontSize: 26,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   nameInput: {
-    fontSize: 26,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '800',
     textAlign: 'center',
     borderBottomWidth: 2,
     width: '80%',
@@ -204,58 +238,36 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   email: {
-    fontSize: 16,
-    color: '#888',
+    fontSize: 15,
     marginTop: 4,
   },
   section: {
-    backgroundColor: 'rgba(150, 150, 150, 0.05)',
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
     marginBottom: 30,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderTopWidth: 0.5,
-    borderTopColor: 'rgba(150, 150, 150, 0.1)',
+    padding: 18,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(150, 150, 150, 0.05)',
   },
   menuText: {
+    flex: 1,
     fontSize: 16,
+    fontWeight: '500',
     marginLeft: 16,
   },
-  editButton: {
-    flexDirection: 'row',
-    backgroundColor: '#25D366',
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  editButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  saveButton: {
-    backgroundColor: '#00A884',
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  saveText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  logoutButton: {
-    backgroundColor: '#ff4444',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  logoutText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  footerText: {
+    textAlign: 'center',
+    fontSize: 12,
+    marginTop: 10,
+    opacity: 0.5,
   },
 });
