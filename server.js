@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
 
 // --- Unified Schemas & Models ---
 const UserSchema = new mongoose.Schema({
@@ -203,6 +203,7 @@ const io = new Server(server, {
     origin: '*',
     methods: ['GET', 'POST'],
   },
+  maxHttpBufferSize: 2e7, // 20MB
 });
 
 const MONGODB_URI = process.env.MONGODB_URI;

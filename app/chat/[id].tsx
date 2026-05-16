@@ -29,7 +29,7 @@ export default function ChatRoom() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'light'];
   
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [receiver, setReceiver] = useState<any>(null);
@@ -45,7 +45,7 @@ export default function ChatRoom() {
   };
 
 
-  const flatListRef = useRef(null);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     if (!currentUser || !receiverId) return;
@@ -128,13 +128,13 @@ export default function ChatRoom() {
 
     const messageData = {
       _id: Date.now().toString(), // Temporary ID for optimistic UI
-      senderId: String(currentUser.id).replace(/['"]+/g, '').trim(),
+      senderId: String(currentUser?.id).replace(/['"]+/g, '').trim(),
       receiverId: String(receiverId).replace(/['"]+/g, '').trim(),
       content: type === 'text' ? input.trim() : '',
       type,
       mediaUrl,
       timestamp: new Date().toISOString(),
-      senderName: currentUser.name || currentUser.email.split('@')[0],
+      senderName: currentUser?.name || currentUser?.email?.split('@')[0] || 'Me',
       isOptimistic: true,
     };
 
@@ -233,7 +233,7 @@ export default function ChatRoom() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const isMine = item.senderId === currentUser.id;
+    const isMine = item.senderId === currentUser?.id;
     return (
       <View style={[styles.messageWrapper, isMine ? styles.myMessageWrapper : styles.theirMessageWrapper]}>
         <View style={[styles.messageBubble, isMine ? { backgroundColor: theme.myBubble } : { backgroundColor: theme.theirBubble }]}>
@@ -258,7 +258,7 @@ export default function ChatRoom() {
             <ThemedText style={styles.timestamp}>
               {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </ThemedText>
-            {isMine && <IconSymbol name="checkmark.done" size={14} color="#53BDEB" style={{ marginLeft: 4 }} />}
+            {isMine && <IconSymbol name="checkmark" size={14} color="#53BDEB" style={{ marginLeft: 4 }} />}
           </View>
         </View>
       </View>
