@@ -193,7 +193,7 @@ function ChatList() {
       setLoading(true);
       const apiUrl = Platform.OS === 'web'
         ? window.location.origin
-        : process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
+        : process.env.EXPO_PUBLIC_API_URL || 'https://echonet-yqep.onrender.com';
       
       const cleanId = String(currentUser?.id).replace(/['"]+/g, '').trim();
       const endpoint = isSelectingContact ? '/api/users' : `/api/chats?userId=${cleanId}`;
@@ -219,7 +219,7 @@ function ChatList() {
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={styles.chatItem}
-      onPress={() => onSelectContact(item._id)}
+      onPress={() => onSelectContact(item.id || item._id)}
     >
       <View style={styles.avatar}>
         {item.profileImage ? (
@@ -289,7 +289,7 @@ function ChatList() {
       ) : (
         <FlatList
           data={filteredUsers}
-          keyExtractor={(item: any) => item._id}
+          keyExtractor={(item: any) => item.id || item._id || Math.random().toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={

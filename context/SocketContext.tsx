@@ -32,7 +32,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (user) {
-      const socketUrl = process.env.EXPO_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+      const socketUrl = process.env.EXPO_PUBLIC_SOCKET_URL || 'https://echonet-yqep.onrender.com';
       const newSocket = io(socketUrl);
 
       newSocket.on('connect', () => {
