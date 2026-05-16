@@ -311,8 +311,9 @@ export default function ChatRoom() {
       )}
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 25}
+        style={{ flex: 1 }}
       >
         <View style={styles.inputArea}>
           <View style={[styles.inputContainer, { backgroundColor: colorScheme === 'dark' ? '#202C33' : '#FFF' }]}>

@@ -88,8 +88,9 @@ function AuthScreen({ login }: { login: Function }) {
   return (
     <ThemedView style={styles.container}>
       <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView 
           contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
