@@ -57,10 +57,10 @@ export default function ChatRoom() {
     if (!currentUser || !receiverId || !globalSocket) return;
 
     const handleMessage = (message: any) => {
-      if (
-        (message.senderId === currentUser.id && message.receiverId === receiverId) ||
-        (message.senderId === receiverId && message.receiverId === currentUser.id)
-      ) {
+      // If we are the sender, we already have the optimistic message in state
+      if (message.senderId === currentUser.id) return;
+
+      if (message.receiverId === currentUser.id && message.senderId === receiverId) {
         setMessages((prev) => {
           const exists = prev.find(m => m._id === message._id);
           if (exists) return prev;

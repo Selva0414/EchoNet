@@ -5,6 +5,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -153,7 +154,7 @@ function AuthScreen({ login }: { login: Function }) {
 }
 
 function ChatList() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSelectingContact, setIsSelectingContact] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
