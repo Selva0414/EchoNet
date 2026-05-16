@@ -28,6 +28,8 @@ export default function HomeScreen() {
   return <ChatList />;
 }
 
+import { ScrollView, KeyboardAvoidingView } from 'react-native';
+
 function AuthScreen({ login }: { login: Function }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -51,7 +53,7 @@ function AuthScreen({ login }: { login: Function }) {
     try {
       const apiUrl = Platform.OS === 'web'
         ? window.location.origin
-        : process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
+        : process.env.EXPO_PUBLIC_API_URL || 'https://echonet-yqep.onrender.com';
       
       const endpoint = isLogin ? '/api/login' : '/api/signup';
       console.log(`Authenticating with ${apiUrl}${endpoint}`);
@@ -85,70 +87,80 @@ function AuthScreen({ login }: { login: Function }) {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.formContainer}>
-        <View style={styles.logoContainer}>
-          <IconSymbol size={80} name="bubble.left.and.bubble.right.fill" color="#25D366" />
-          <ThemedText type="title" style={styles.title}>EchoNet</ThemedText>
-        </View>
-        
-        <ThemedText style={styles.subtitle}>
-          {isLogin ? 'Sign in to your account' : 'Sign up for a new account'}
-        </ThemedText>
-
-        <View style={styles.tabContainer}>
-          <TouchableOpacity 
-            style={[styles.tab, isLogin && styles.activeTab]} 
-            onPress={() => { setIsLogin(true); setMessage(''); setErrorDetails(''); }}
-          >
-            <ThemedText style={[styles.tabText, isLogin && styles.activeTabText]}>Login</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.tab, !isLogin && styles.activeTab]} 
-            onPress={() => { setIsLogin(false); setMessage(''); setErrorDetails(''); }}
-          >
-            <ThemedText style={[styles.tabText, !isLogin && styles.activeTabText]}>Sign Up</ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        <TextInput
-          style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
-          placeholder="Email address"
-          placeholderTextColor="#888"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        <TextInput
-          style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
-          placeholder="Password"
-          placeholderTextColor="#888"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        {message ? (
-          <ThemedText style={[styles.message, message.startsWith('Success') ? styles.success : styles.error]}>
-            {message}
-          </ThemedText>
-        ) : null}
-
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
-          onPress={handleAuth}
-          disabled={loading}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <ThemedText style={styles.buttonText}>
-              {isLogin ? 'LOG IN' : 'SIGN UP'}
+          <View style={styles.formContainer}>
+            <View style={styles.logoContainer}>
+              <IconSymbol size={80} name="bubble.left.and.bubble.right.fill" color="#25D366" />
+              <ThemedText type="title" style={styles.title}>EchoNet</ThemedText>
+            </View>
+            
+            <ThemedText style={styles.subtitle}>
+              {isLogin ? 'Sign in to your account' : 'Sign up for a new account'}
             </ThemedText>
-          )}
-        </TouchableOpacity>
-      </View>
+
+            <View style={styles.tabContainer}>
+              <TouchableOpacity 
+                style={[styles.tab, isLogin && styles.activeTab]} 
+                onPress={() => { setIsLogin(true); setMessage(''); setErrorDetails(''); }}
+              >
+                <ThemedText style={[styles.tabText, isLogin && styles.activeTabText]}>Login</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.tab, !isLogin && styles.activeTab]} 
+                onPress={() => { setIsLogin(false); setMessage(''); setErrorDetails(''); }}
+              >
+                <ThemedText style={[styles.tabText, !isLogin && styles.activeTabText]}>Sign Up</ThemedText>
+              </TouchableOpacity>
+            </View>
+
+            <TextInput
+              style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+              placeholder="Email address"
+              placeholderTextColor="#888"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <TextInput
+              style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+              placeholder="Password"
+              placeholderTextColor="#888"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+
+            {message ? (
+              <ThemedText style={[styles.message, message.startsWith('Success') ? styles.success : styles.error]}>
+                {message}
+              </ThemedText>
+            ) : null}
+
+            <TouchableOpacity 
+              style={[styles.button, loading && styles.buttonDisabled]} 
+              onPress={handleAuth}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <ThemedText style={styles.buttonText}>
+                  {isLogin ? 'LOG IN' : 'SIGN UP'}
+                </ThemedText>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }

@@ -43,15 +43,20 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
       newSocket.on('receive_message', async (message) => {
         try {
-          // Show notification if not in background (simple check)
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: `Message from ${message.senderName || 'Contact'}`,
-              body: message.type === 'text' ? message.content : `Sent a ${message.type}`,
-              data: { senderId: message.senderId },
-            },
-            trigger: null,
-          });
+          const cleanUserId = String(user.id).replace(/['"]+/g, '').trim();
+          const cleanSenderId = String(message.senderId).replace(/['"]+/g, '').trim();
+          
+          // Only show notification if WE are the receiver
+          if (cleanSenderId !== cleanUserId) {
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: `Message from ${message.senderName || 'Contact'}`,
+                body: message.type === 'text' ? message.content : `Sent a ${message.type}`,
+                data: { senderId: message.senderId },
+              },
+              trigger: null,
+            });
+          }
         } catch (error) {
           console.error('Notification error:', error);
         }
