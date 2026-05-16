@@ -12,6 +12,10 @@
       "android": {
         "buildType": "apk",
         "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://echonet-yqep.onrender.com",
+        "EXPO_PUBLIC_SOCKET_URL": "https://echonet-yqep.onrender.com"
       }
     },
     "production": {}
