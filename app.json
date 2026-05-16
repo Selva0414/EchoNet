@@ -7,7 +7,7 @@
     "icon": "./assets/images/Message.png",
     "scheme": "inten",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
@@ -44,8 +44,8 @@
         "expo-build-properties",
         {
           "android": {
-            "newArchEnabled": true,
-            "kotlinVersion": "2.0.21"
+            "newArchEnabled": false,
+            "kotlinVersion": "1.9.24"
           }
         }
       ]
