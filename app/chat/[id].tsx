@@ -80,8 +80,12 @@ export default function ChatRoom() {
     if (!currentUser?.id || !receiverId) return;
     
     try {
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
-      const response = await fetch(`${apiUrl}/api/messages?user1=${currentUser.id}&user2=${receiverId}`);
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'https://echonet-yqep.onrender.com';
+      const cleanSenderId = String(currentUser.id).replace(/['"]+/g, '').trim();
+      const cleanReceiverId = String(receiverId).replace(/['"]+/g, '').trim();
+      
+      console.log(`Fetching messages: ${cleanSenderId} <-> ${cleanReceiverId}`);
+      const response = await fetch(`${apiUrl}/api/messages?user1=${cleanSenderId}&user2=${cleanReceiverId}`);
       const data = await response.json();
       
       if (Array.isArray(data)) {
@@ -97,20 +101,22 @@ export default function ChatRoom() {
   const fetchReceiverInfo = async () => {
     if (!receiverId) return;
     try {
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'https://echonet-yqep.onrender.com';
+      const cleanReceiverId = String(receiverId).replace(/['"]+/g, '').trim();
       
-      // Try Direct Lookup first
-      const response = await fetch(`${apiUrl}/api/users/${receiverId}`);
+      const response = await fetch(`${apiUrl}/api/users/${cleanReceiverId}`);
       const info = await response.json();
       
-      if (info && info.name) {
+      if (info && (info.name || info.email)) {
         setReceiver(info);
       } else {
-        // Fallback: Search in full list
         const listResponse = await fetch(`${apiUrl}/api/users`);
         const listData = await listResponse.json();
         if (Array.isArray(listData)) {
-          const fallback = listData.find(u => (u.id || u._id) === receiverId);
+          const fallback = listData.find(u => {
+            const uId = String(u.id || u._id).replace(/['"]+/g, '').trim();
+            return uId === cleanReceiverId;
+          });
           if (fallback) setReceiver(fallback);
         }
       }
